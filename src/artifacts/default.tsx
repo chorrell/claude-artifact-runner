@@ -1,106 +1,159 @@
-import { useState } from 'react';
-import { AlertCircle, Mail, Lock, Github, Facebook, Twitter } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError('Please fill in all fields');
-    } else {
-      setError('');
-      console.log('Login attempted:', { email, password });
-      // Here you would typically handle the login logic
-      alert(`Login attempted: ${email}, ${password}`);
-    }
+const BrandArchetypeCalculator = () => {
+  const [scores, setScores] = useState({});
+  const [results, setResults] = useState([]);
+  
+  const questions = {
+    innovator: [
+      { id: 1, text: "We prioritize innovation and disrupting industry standards" },
+      { id: 7, text: "We communicate with bold, visionary language about the future" },
+      { id: 13, text: "We challenge conventional thinking and encourage new approaches" },
+      { id: 19, text: "We value creativity and breaking new ground" }
+    ],
+    expert: [
+      { id: 2, text: "Our primary focus is helping other businesses achieve operational excellence" },
+      { id: 8, text: "Our messaging emphasizes precision, expertise, and technical excellence" },
+      { id: 14, text: "Our solutions are built on established methodologies and best practices" },
+      { id: 20, text: "Excellence and precision are our top priorities" }
+    ],
+    partner: [
+      { id: 3, text: "We see ourselves as trusted advisors and knowledge leaders" },
+      { id: 9, text: "We focus on building long-term partnerships and relationships" },
+      { id: 15, text: "We customize our approach for each client's unique needs" },
+      { id: 21, text: "We prioritize long-term relationships over short-term gains" }
+    ],
+    leader: [
+      { id: 4, text: "We aim to empower organizations to transform and reach their full potential" },
+      { id: 10, text: "Our communication style is authoritative and confident" },
+      { id: 16, text: "We set industry standards and influence market direction" },
+      { id: 22, text: "Leadership and vision guide our decisions" }
+    ],
+    anchor: [
+      { id: 5, text: "We pride ourselves on being reliable, stable, and trustworthy" },
+      { id: 11, text: "We emphasize practical results and proven solutions" },
+      { id: 17, text: "We focus on reliability and consistent delivery" },
+      { id: 23, text: "Stability and dependability are central to our identity" }
+    ],
+    strategist: [
+      { id: 6, text: "Our goal is to help businesses navigate complex challenges and find clarity" },
+      { id: 12, text: "We use data-driven insights and analytical approaches" },
+      { id: 18, text: "We solve complex problems through systematic analysis" },
+      { id: 24, text: "We value intellectual rigor and expertise" }
+    ]
   };
 
-  const handleSocialLogin = (platform:string) => {
-    console.log(`${platform} login attempted`);
-    // Here you would typically handle the social login logic
-    alert(`${platform} login attempted`);
+  const getAlignmentStrength = (score) => {
+    if (score >= 16) return "Very Strong";
+    if (score >= 12) return "Strong";
+    if (score >= 8) return "Moderate";
+    return "Weak";
   };
+
+  const handleScoreChange = (questionId, value) => {
+    setScores(prev => ({
+      ...prev,
+      [questionId]: parseInt(value) || 0
+    }));
+  };
+
+  useEffect(() => {
+    const calculateResults = () => {
+      const archetypeScores = Object.entries(questions).map(([archetype, qs]) => ({
+        name: archetype.charAt(0).toUpperCase() + archetype.slice(1),
+        score: qs.reduce((sum, q) => sum + (scores[q.id] || 0), 0),
+      }));
+
+      archetypeScores.sort((a, b) => b.score - a.score);
+      setResults(archetypeScores);
+    };
+
+    calculateResults();
+  }, [scores]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
+    <div className="max-w-4xl mx-auto space-y-8">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">Demo Login Component</CardTitle>
+          <CardTitle>B2B Brand Archetype Calculator</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                icon={<Mail className="h-4 w-4 text-gray-500" />}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                icon={<Lock className="h-4 w-4 text-gray-500" />}
-              />
-            </div>
-            <Button type="submit" className="w-full">Log In</Button>
-          </form>
-
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="flex space-x-4 mt-6">
-            <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Github')}>
-              <Github className="mr-2 h-4 w-4" /> Github
-            </Button>
-            <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Facebook')}>
-              <Facebook className="mr-2 h-4 w-4" /> Facebook
-            </Button>
-            <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Twitter')}>
-              <Twitter className="mr-2 h-4 w-4" /> Twitter
-            </Button>
-          </div>
-
-          <div className="text-center text-sm mt-6">
-            Don't have an account?{' '}
-            <Link to="signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
+          <div className="space-y-8">
+            {Object.entries(questions).map(([archetype, questionList]) => (
+              <div key={archetype} className="space-y-4">
+                <h3 className="text-lg font-semibold capitalize">{archetype}</h3>
+                {questionList.map(question => (
+                  <div key={question.id} className="flex items-center space-x-4">
+                    <span className="flex-grow">{question.text}</span>
+                    <select
+                      value={scores[question.id] || ""}
+                      onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                      className="p-2 border rounded"
+                    >
+                      <option value="">Select...</option>
+                      {[1, 2, 3, 4, 5].map(num => (
+                        <option key={num} value={num}>{num}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
+
+      {results.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Results</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Archetype Scores</h3>
+                <BarChart width={600} height={300} data={results}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 20]} />
+                  <Tooltip />
+                  <Bar dataKey="score" fill="#4F46E5" />
+                </BarChart>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Analysis</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="font-medium">Primary Archetype:</p>
+                    <p>{results[0]?.name} ({results[0]?.score}/20) - {getAlignmentStrength(results[0]?.score)} Alignment</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Secondary Archetype:</p>
+                    <p>{results[1]?.name} ({results[1]?.score}/20) - {getAlignmentStrength(results[1]?.score)} Alignment</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Full Rankings</h3>
+                <div className="space-y-2">
+                  {results.map((result, index) => (
+                    <div key={result.name} className="flex justify-between">
+                      <span>{index + 1}. {result.name}</span>
+                      <span>{result.score}/20 ({getAlignmentStrength(result.score)})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
 
-export default LoginForm;
+export default BrandArchetypeCalculator;
