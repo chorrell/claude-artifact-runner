@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
